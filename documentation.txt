@@ -1,0 +1,43 @@
+
+Business View Invoice to EDI Workflow
+Overview:This workflow converts Business View invoices into EDI messages. The process is divided into three main steps:
+
+1. Text Extraction from Image/PDF
+What has been done:
+* Used EasyOCR and Tesseract for text extraction.
+    * Limitation: Both extract text horizontally. Vertically-aligned data may not be captured correctly.
+    * Pre-processing (e.g., thresholding, sharpening) helped extract most of the text, but there is no general pre-processing strategy yet due to varying document layouts.
+* Tried Docling for structured extraction:
+    * Separates normal text and tables (if tables have cells).
+    * Extracts raw text, which provides full context to the LLM.
+    * Can export readable text (currently used in code) but may not include all extracted data.
+    * It internally uses EasyOCR and/or Tesseract and is hence a better option to go with.
+* Observations:
+    * Knowing the document layout in advance increases extraction accuracy.
+    * Passing both readable text and raw extracted text to the LLM ensures missing or misaligned data can be inferred.
+Next steps / Recommendations:
+* Consider creating document-specific pre-processing templates for better OCR accuracy.
+* Explore Docling’s table detection options for documents with irregular layouts.
+
+2. Text Formatting using LLM
+What has been done:
+* Text obtained from the document is formatted by the LLM.
+* LLM is given a bit of context about EDI document types.
+What needs to be done:
+* Implement template-based formatting (Freemarker/Jinja):
+    * Generate a formatted result from the LLM (This part is done).
+    * Save the template so future similar documents can bypass LLM formatting, improving efficiency and consistency.
+
+3. EDI Message Generation
+What has been done:
+* LLM is prompted as an EDI specialist.
+* Context includes different EDI documents (e.g., PO = 850, Invoice = 810).
+What needs to be done:
+* Provide detailed guidance on EDI code generation:
+    * Include Do’s and Don’ts.
+    * Ensure compliance with standard EDI formats.
+* Refine LLM prompts for better accuracy in mapping document fields to EDI segments.
+
+Additional Notes
+* Document layout knowledge improves both extraction and EDI generation accuracy.
+* Passing both raw and cleaned text ensures the LLM has enough context for missing or misaligned information.
